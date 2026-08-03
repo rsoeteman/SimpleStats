@@ -5,7 +5,7 @@
     <RootNamespace>SimpleStats.Client</RootNamespace>
     <AssemblyName>SimpleStats.Client</AssemblyName>
     <Version>1.0.0</Version>
-    <Description>Umbraco backoffice extension for SimpleStats – registers App_Plugins assets and manifests.</Description>
+    <Description>Umbraco backoffice extension for SimpleStats.</Description>
 
     <!-- NuGet packaging -->
     <IsPackable>true</IsPackable>

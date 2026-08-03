@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <Authors>rsoeteman</Authors>
-    <Company>rsoeteman</Company>
+    <Authors>Richard Soeteman</Authors>
+    <Company>Soeteman Software</Company>
     <Product>SimpleStats</Product>
     <Copyright>Copyright © rsoeteman $([System.DateTime]::UtcNow.Year)</Copyright>
     <RepositoryUrl>https://github.com/rsoeteman/SimpleStats</RepositoryUrl>
