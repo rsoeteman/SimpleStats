@@ -55,7 +55,7 @@ npm run build
 ```
 
 ## Development Guidelines
-
+- Every Change must be added in a separate branch. NEVER commit directly to main, always via a Pull Request
 - Follow [Umbraco contribution guidelines](https://docs.umbraco.com/umbraco-cms/contribute)
 - Keep C# code compatible with **Umbraco 17, 18, and 19**
 - Frontend components should use the `@umbraco-cms/backoffice` Lit/Web Component APIs

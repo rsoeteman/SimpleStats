@@ -1,0 +1,43 @@
+
+#Set Variables
+$sitename = "SimpleStatsTestSite"
+$productlocation = "F:\umbraco\Packages\SimpleStats\src\"
+$projects = "SimpleStats\SimpleStats.csproj", "SimpleStats.Client\SimpleStats.Client.csproj"
+
+#Create new Umbraco Site
+dotnet new install Umbraco.Templates@17
+dotnet new umbraco -n $sitename  --connection-string "Server=(localdb)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\Umbraco.mdf;Integrated Security=true" -sk Umbraco.TheStarterKit
+
+cd $sitename
+
+#Copy empty DB
+$CurrentPath = Get-Location
+$DBFolder = Join-Path $CurrentPath "umbraco\data"
+if (-not (Test-Path $DBFolder)) {
+    New-Item -ItemType Directory -Path $DBFolder -Force | Out-Null
+}
+Copy-Item -Path "F:\umbraco\EmptyDB\*" -Destination $DBFolder -Recurse -Force
+
+#Set info for installer
+Set-Item Env:\UMBRACO__CMS__GLOBAL__INSTALLMISSINGDATABASE true
+Set-Item Env:\UMBRACO__CMS__UNATTENDED__INSTALLUNATTENDED true
+Set-Item Env:\UMBRACO__CMS__UNATTENDED__UNATTENDEDUSERNAME "Soeteman Software Test User"
+Set-Item Env:\UMBRACO__CMS__UNATTENDED__UNATTENDEDUSEREMAIL "testuser@soetemansoftware.nl"
+Set-Item Env:\UMBRACO__CMS__UNATTENDED__UNATTENDEDUSERPASSWORD "test123456"
+
+#Create solution and add project and Starterkit
+dotnet new sln
+dotnet sln add $($sitename+".csproj")
+
+
+foreach ($project  in $projects ) {
+	dotnet sln add $($productlocation + $($project))
+	dotnet add $($sitename+".csproj") reference $($productlocation +$($project))
+    }
+
+#build site including dependencies
+dotnet build
+
+#start site
+dotnet run
+
