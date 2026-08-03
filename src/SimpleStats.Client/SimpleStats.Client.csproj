@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SimpleStats.Client</RootNamespace>
+    <AssemblyName>SimpleStats.Client</AssemblyName>
+    <Version>1.0.0</Version>
+    <Description>Umbraco backoffice extension for SimpleStats – registers App_Plugins assets and manifests.</Description>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>SimpleStats.Client</PackageId>
+
+    <!--
+      Configure the static web asset base path so assets are served from
+      /App_Plugins/SimpleStats/ when this library is referenced by an Umbraco site.
+    -->
+    <StaticWebAssetBasePath>App_Plugins/SimpleStats</StaticWebAssetBasePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Umbraco CMS – version range covers Umbraco 17, 18 and 19 -->
+    <PackageReference Include="Umbraco.Cms.Core" Version="[17.0.0,20.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Reference the main SimpleStats project -->
+    <ProjectReference Include="..\SimpleStats\SimpleStats.csproj" />
+  </ItemGroup>
+
+  <!--
+    Include the compiled frontend assets from the Vite build output.
+    Run `npm run build` inside this project directory first.
+  -->
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

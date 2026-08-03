@@ -1,0 +1,22 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>rsoeteman</Authors>
+    <Company>rsoeteman</Company>
+    <Product>SimpleStats</Product>
+    <Copyright>Copyright © rsoeteman $([System.DateTime]::UtcNow.Year)</Copyright>
+    <RepositoryUrl>https://github.com/rsoeteman/SimpleStats</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rsoeteman/SimpleStats</PackageProjectUrl>
+    <PackageTags>umbraco;statistics;analytics;backoffice</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>
