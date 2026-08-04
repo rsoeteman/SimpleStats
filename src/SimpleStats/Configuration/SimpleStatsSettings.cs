@@ -9,9 +9,9 @@ public sealed class SimpleStatsSettings
     /// <summary>Gets the configuration section name used in <c>appsettings.json</c>.</summary>
     public const string SectionName = "SimpleStats";
 
-    /// <summary>Gets or sets the number of top pages to show in the dashboard widget.</summary>
-    public int TopPagesCount { get; set; } = 10;
+    /// <summary>Gets or sets the content node keys excluded from page-view tracking (for example, a custom error page).</summary>
+    public Guid[] ExcludedNodeIds { get; set; } = [];
 
-    /// <summary>Gets or sets the number of days of historical data to retain.</summary>
-    public int RetentionDays { get; set; } = 90;
+    /// <summary>Gets or sets how often, in seconds, buffered view counts are committed to the database.</summary>
+    public int CommitIntervalSeconds { get; set; } = 60;
 }

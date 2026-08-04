@@ -1,6 +1,16 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleStats.Configuration;
+using SimpleStats.Data;
+using SimpleStats.Jobs;
+using SimpleStats.Middleware;
+using SimpleStats.NotificationHandlers;
+using SimpleStats.Services;
 using Umbraco.Cms.Core.DependencyInjection;
+using Umbraco.Cms.Core.Notifications;
+using Umbraco.Cms.Web.Common.ApplicationBuilder;
+using Umbraco.Extensions;
 
 namespace SimpleStats.Extensions;
 
@@ -18,6 +28,21 @@ public static class UmbracoBuilderExtensions
     {
         builder.Services.AddOptions<SimpleStatsSettings>()
             .BindConfiguration(SimpleStatsSettings.SectionName);
+
+        builder.Services.AddUmbracoDbContext<SimpleStatsContext>(
+            (IServiceProvider serviceProvider, DbContextOptionsBuilder options, string? connectionString, string? providerName) =>
+                options.UseUmbracoDatabaseProvider(serviceProvider),
+            shareUmbracoConnection: true);
+
+        builder.Services.AddSingleton<ISimpleStatsService, SimpleStatsService>();
+        builder.Services.AddRecurringBackgroundJob<SimpleStatsCommitJob>();
+        builder.AddNotificationAsyncHandler<UmbracoApplicationStartedNotification, EnsureSimpleStatsDatabaseCreated>();
+
+        builder.Services.Configure<UmbracoPipelineOptions>(options =>
+            options.AddFilter(new UmbracoPipelineFilter(nameof(SimpleStats))
+            {
+                PostPipeline = app => app.UseMiddleware<SimpleStatsMiddleware>(),
+            }));
 
         return builder;
     }
