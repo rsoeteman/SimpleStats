@@ -13,8 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Umbraco CMS core – version range covers Umbraco 17, 18 and 19 -->
-    <PackageReference Include="Umbraco.Cms.Core" Version="[17.0.0,20.0.0)" />
+    <!-- Umbraco CMS core – version range covers Umbraco 17, 18 and 19. Floor is 17.4.0, not
+         17.0.0: AddUmbracoDbContext's shareUmbracoConnection overload (used below) was not yet
+         present in early 17.0.x patch releases. -->
+    <PackageReference Include="Umbraco.Cms.Core" Version="[17.4.0,20.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Infrastructure" Version="[17.4.0,20.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="[17.4.0,20.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Persistence.EFCore" Version="[17.4.0,20.0.0)" />
   </ItemGroup>
 
   <ItemGroup>
