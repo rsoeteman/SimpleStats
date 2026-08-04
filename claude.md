@@ -55,9 +55,10 @@ npm run build
 ```
 
 ## Development Guidelines
-- Every Change must be added in a separate branch. NEVER commit directly to main, always via a Pull Request
-- Follow [Umbraco contribution guidelines](https://docs.umbraco.com/umbraco-cms/contribute)
+- Every Change must be added in a separate branch. NEVER commit directly to main, always via a Pull Request. always prefix branchename with `claude/`
+- Follow [Umbraco  documentaion](https://docs.umbraco.com/umbraco-cms/17.latest)
 - Keep C# code compatible with **Umbraco 17, 18, and 19**
+- Database is using EFCORE 10/ IMPORTANT Read Umbraco instructions https://docs.umbraco.com/umbraco-cms/extend-your-project/tutorials/getting-started-with-entity-framework-core
 - Frontend components should use the `@umbraco-cms/backoffice` Lit/Web Component APIs
 - All public APIs must be documented with XML doc comments
 - Use `IOptions<SimpleStatsSettings>` for any configurable values

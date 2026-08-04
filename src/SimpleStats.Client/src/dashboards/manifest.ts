@@ -1,0 +1,23 @@
+
+const dashboards = [
+    {
+        type: 'dashboard',
+        name: 'simplestats dashboard',
+        alias: 'simplestats.dashboard',
+        elementName: 'simplestats-dashboard',
+        js: () => import("./simplestats-dashboard.element.ts"),
+        weight: -10,
+        meta: {
+            label: 'Simplestats Dashboard',
+            pathname: 'simplestatsdashboard'
+        },
+        conditions: [
+            {
+                alias: 'Umb.Condition.SectionAlias',
+                match: 'content'
+            }
+        ]
+    }
+]
+
+export const manifests = [...dashboards];
