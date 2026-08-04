@@ -14,7 +14,7 @@ const dashboards = [
         conditions: [
             {
                 alias: 'Umb.Condition.SectionAlias',
-                match: 'content'
+                match: 'Umb.Section.Content'
             }
         ]
     }
