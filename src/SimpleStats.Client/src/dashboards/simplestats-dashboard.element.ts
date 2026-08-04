@@ -1,10 +1,11 @@
-import { LitElement, html, css, customElement } from '@umbraco-cms/backoffice/external/lit';
+import { html, css, customElement } from '@umbraco-cms/backoffice/external/lit';
+import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 
 /**
  * SimpleStats dashboard element – renders site statistics in the Umbraco backoffice.
  */
 @customElement('simplestats-dashboard')
-export class SimpleStatsDashboardElement extends LitElement {
+export class SimpleStatsDashboardElement extends UmbLitElement {
   static override styles = css`
     :host {
       display: block;

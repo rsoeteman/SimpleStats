@@ -1,0 +1,12 @@
+{
+  "name": "SimpleStats",
+  "version": "0.0.7-developermode",
+  "extensions": [
+    {
+      "type": "backofficeEntryPoint",
+      "alias": "SimpleStats.entryPoint",
+      "name": "SimpleStats entryPoint",
+      "js": "/App_Plugins/SimpleStats/assets/simplestats.js"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SimpleStats</RootNamespace>
     <AssemblyName>SimpleStats</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>0.0.7-developermode</Version>
     <Description>An Umbraco package that provides site statistics in the backoffice.</Description>
 
     <!-- NuGet packaging -->
@@ -15,6 +15,11 @@
   <ItemGroup>
     <!-- Umbraco CMS core – version range covers Umbraco 17, 18 and 19 -->
     <PackageReference Include="Umbraco.Cms.Core" Version="[17.0.0,20.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Depend on the client package so App_Plugins assets flow into consuming Umbraco sites. -->
+    <ProjectReference Include="..\SimpleStats.Client\SimpleStats.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,16 +3,24 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitOverride": true,
     "useDefineForClassFields": true,
     "experimentalDecorators": true,
-    "outDir": "dist",
+    "outDir": "wwwroot/App_Plugins/SimpleStats/assets",
     "declaration": true,
     "declarationMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    //path aliasses/
+    "baseUrl": "./src",
+    "paths": {
+      "@simplestats-dashboards/*": ["dashboards/*"],
+      "@simplestats-languages/*": ["lang/*"],
+    }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src"]
 }

@@ -1,24 +1,19 @@
-// SimpleStats backoffice extension entry point.
-// All Umbraco extension manifests are registered here.
-import './dashboard/simplestats-dashboard.element.js';
+import {UmbEntryPointOnInit} from '@umbraco-cms/backoffice/extension-api';
+import {manifests as dashboardManifests} from '@simplestats-dashboards/manifest.ts';
+import {UMB_AUTH_CONTEXT} from "@umbraco-cms/backoffice/auth";
 
-const manifests: Array<UmbExtensionManifest> = [
-  {
-    type: 'dashboard',
-    alias: 'SimpleStats.Dashboard',
-    name: 'SimpleStats Dashboard',
-    element: () => import('./dashboard/simplestats-dashboard.element.js'),
-    meta: {
-      label: 'SimpleStats',
-      pathname: 'simplestats',
-    },
-    conditions: [
-      {
-        alias: 'Umb.Condition.SectionAlias',
-        match: 'Umb.Section.Content',
-      },
-    ],
-  },
-];
+export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
 
-export { manifests };
+    console.log('Registering SimpleStats manifests');
+    extensionRegistry.registerMany([
+        ...dashboardManifests,
+    ]);
+
+
+    _host.consumeContext(UMB_AUTH_CONTEXT, (_auth) => {
+        if (!_auth) {
+            return;
+        }
+    });
+
+};
