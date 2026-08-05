@@ -1,58 +1,14 @@
 import { html, css, nothing, customElement, state, repeat } from '@umbraco-cms/backoffice/external/lit';
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
+import { SimpleStatsPageViewsRepository } from './repository/page-views.repository.ts';
 
 const PAGE_SIZE = 50;
 
-const NODE_NAMES = [
-  'Home', 'About Us', 'Contact', 'News', 'News/Company Update', 'News/Product Launch',
-  'News/Press Release', 'Blog', 'Blog/Getting Started', 'Blog/Release Notes',
-  'Blog/Case Study Alpha', 'Blog/Case Study Beta', 'Products', 'Products/Widget A',
-  'Products/Widget B', 'Products/Widget C', 'Products/Widget D', 'Products/Accessories',
-  'Services', 'Services/Consulting', 'Services/Support', 'Services/Training', 'Team',
-  'Team/Leadership', 'Team/Careers', 'Careers/Open Roles', 'Pricing', 'Pricing/Enterprise',
-  'Pricing/Starter', 'FAQ', 'Support', 'Support/Knowledge Base', 'Support/Contact Support',
-  'Legal', 'Legal/Privacy Policy', 'Legal/Terms of Service', 'Partners', 'Partners/Directory',
-  'Events', 'Events/Webinar Series', 'Events/Conference 2025', 'Downloads',
-  'Downloads/Whitepapers', 'Downloads/Datasheets', 'Locations', 'Locations/Amsterdam',
-  'Locations/Berlin', 'Locations/London', 'Media Gallery', 'Testimonials', 'Case Studies',
-];
-
-interface ContentAccessNode {
-  id: number;
-  name: string;
-  events: number[];
-}
-
 interface ContentAccessRow {
-  id: number;
+  id: string;
   name: string;
   count: number;
 }
-
-function createSeededRandom(seed: number) {
-  let value = seed;
-  return () => {
-    value = (value * 1103515245 + 12345) & 0x7fffffff;
-    return value / 0x7fffffff;
-  };
-}
-
-/** Placeholder access data until a real reporting API is wired up. */
-function generateMockNodes(): ContentAccessNode[] {
-  const random = createSeededRandom(42);
-  const now = Date.now();
-  const oneYearMs = 365 * 24 * 60 * 60 * 1000;
-  return NODE_NAMES.map((name, id) => {
-    const eventCount = Math.floor(random() * 40) * (random() > 0.15 ? 1 : 0);
-    const events: number[] = [];
-    for (let i = 0; i < eventCount; i++) {
-      events.push(now - Math.floor(random() * oneYearMs * 1.3));
-    }
-    return { id, name, events };
-  });
-}
-
-const MOCK_NODES = generateMockNodes();
 
 function toISODate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -81,16 +37,45 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
   @state()
   private _page = 0;
 
-  #getRows(): ContentAccessRow[] {
-    const startMs = new Date(`${this._appliedRange.start}T00:00:00`).getTime();
-    const endMs = new Date(`${this._appliedRange.end}T23:59:59`).getTime();
-    return MOCK_NODES.map((node) => ({
-      id: node.id,
-      name: node.name,
-      count: node.events.filter((ts) => ts >= startMs && ts <= endMs).length,
-    }))
-      .filter((row) => row.count > 0)
-      .sort((a, b) => b.count - a.count);
+  @state()
+  private _rows: ContentAccessRow[] = [];
+
+  @state()
+  private _loading = false;
+
+  @state()
+  private _error = false;
+
+  #repository = new SimpleStatsPageViewsRepository(this);
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.#fetchRows();
+  }
+
+  async #fetchRows() {
+    this._loading = true;
+    this._error = false;
+
+    try {
+      const { data, error } = await this.#repository.requestPageViews(this._appliedRange.start, this._appliedRange.end);
+
+      if (error) {
+        console.error('[SimpleStats] Failed to load page views', error);
+        this._error = true;
+        this._rows = [];
+      } else {
+        this._rows = (data ?? [])
+          .map((summary) => ({ id: summary.nodeKey, name: summary.nodeName, count: summary.count }))
+          .sort((a, b) => b.count - a.count);
+      }
+    } catch (error) {
+      console.error('[SimpleStats] Unexpected error loading page views', error);
+      this._error = true;
+      this._rows = [];
+    } finally {
+      this._loading = false;
+    }
   }
 
   #onStartDateChange(event: Event) {
@@ -104,6 +89,7 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
   #applyFilter() {
     this._appliedRange = { start: this._startDate, end: this._endDate };
     this._page = 0;
+    this.#fetchRows();
   }
 
   #onPageChange(event: Event) {
@@ -112,7 +98,7 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
 
   override render() {
     const rangeInvalid = new Date(this._startDate) > new Date(this._endDate);
-    const rows = this.#getRows();
+    const rows = this._rows;
     const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
     const page = Math.min(this._page, pageCount - 1);
     const pagedRows = rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
@@ -139,8 +125,31 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
 
         ${rangeInvalid ? html`<p class="error">Start date must be before end date.</p>` : nothing}
 
-        ${rows.length === 0 ? this.#renderEmptyState() : this.#renderTable(rows, pagedRows, page, pageCount)}
+        ${this._loading
+          ? this.#renderLoading()
+          : this._error
+            ? this.#renderErrorState()
+            : rows.length === 0
+              ? this.#renderEmptyState()
+              : this.#renderTable(rows, pagedRows, page, pageCount)}
       </uui-box>
+    `;
+  }
+
+  #renderLoading() {
+    return html`
+      <div class="loading">
+        <uui-loader></uui-loader>
+      </div>
+    `;
+  }
+
+  #renderErrorState() {
+    return html`
+      <div class="empty-state">
+        <div class="empty-title">Couldn't load page view data</div>
+        <div class="empty-description">Something went wrong while fetching the report. Please try again.</div>
+      </div>
     `;
   }
 
@@ -226,6 +235,12 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
       font-size: 13px;
       color: var(--uui-color-danger);
       margin: -8px 0 18px;
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      padding: 56px 20px;
     }
 
     .empty-state {
