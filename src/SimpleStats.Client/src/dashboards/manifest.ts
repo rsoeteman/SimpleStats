@@ -8,7 +8,7 @@ const dashboards = [
         js: () => import("./simplestats-dashboard.element.ts"),
         weight: -10,
         meta: {
-            label: 'Simplestats Dashboard',
+            label: '#simpleStats_dashboardLabel',
             pathname: 'simplestatsdashboard'
         },
         conditions: [
