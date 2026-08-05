@@ -8,7 +8,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitOverride": true,
-    "useDefineForClassFields": true,
+    "useDefineForClassFields": false,
     "experimentalDecorators": true,
     "outDir": "wwwroot/App_Plugins/SimpleStats/assets",
     "declaration": true,
