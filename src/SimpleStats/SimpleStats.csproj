@@ -20,6 +20,7 @@
     <PackageReference Include="Umbraco.Cms.Infrastructure" Version="[17.4.0,20.0.0)" />
     <PackageReference Include="Umbraco.Cms.Web.Common" Version="[17.4.0,20.0.0)" />
     <PackageReference Include="Umbraco.Cms.Persistence.EFCore" Version="[17.4.0,20.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" Version="[17.4.0,20.0.0)" />
   </ItemGroup>
 
   <ItemGroup>

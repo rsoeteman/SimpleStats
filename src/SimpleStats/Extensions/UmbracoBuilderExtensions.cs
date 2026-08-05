@@ -6,6 +6,7 @@ using SimpleStats.Data;
 using SimpleStats.Jobs;
 using SimpleStats.Middleware;
 using SimpleStats.NotificationHandlers;
+using SimpleStats.OpenApi;
 using SimpleStats.Services;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
@@ -37,6 +38,8 @@ public static class UmbracoBuilderExtensions
         builder.Services.AddSingleton<ISimpleStatsService, SimpleStatsService>();
         builder.Services.AddRecurringBackgroundJob<SimpleStatsCommitJob>();
         builder.AddNotificationAsyncHandler<UmbracoApplicationStartedNotification, EnsureSimpleStatsDatabaseCreated>();
+
+        builder.Services.ConfigureOptions<ConfigureSimpleStatsSwaggerGenOptions>();
 
         builder.Services.Configure<UmbracoPipelineOptions>(options =>
             options.AddFilter(new UmbracoPipelineFilter(nameof(SimpleStats))

@@ -2,7 +2,9 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SimpleStats.Data;
+using SimpleStats.OpenApi;
 using SimpleStats.Services;
+using Umbraco.Cms.Api.Common.Attributes;
 using Umbraco.Cms.Web.Common.Authorization;
 using Umbraco.Cms.Web.Common.Routing;
 
@@ -15,6 +17,7 @@ namespace SimpleStats.Controllers;
 [ApiVersion("1.0")]
 [BackOfficeRoute("simplestats/api/v{version:apiVersion}")]
 [Authorize(Policy = AuthorizationPolicies.BackOfficeAccess)]
+[MapToApi(SimpleStatsApiConfiguration.ApiName)]
 public sealed class PageViewsController : ControllerBase
 {
     private readonly ISimpleStatsService _simpleStatsService;
