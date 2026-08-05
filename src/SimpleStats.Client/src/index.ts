@@ -1,5 +1,6 @@
 import {UmbEntryPointOnInit} from '@umbraco-cms/backoffice/extension-api';
 import {manifests as dashboardManifests} from '@simplestats-dashboards/manifest.ts';
+import {manifests as languageManifests} from '@simplestats-languages/manifest.ts';
 import {UMB_AUTH_CONTEXT} from "@umbraco-cms/backoffice/auth";
 
 export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
@@ -7,6 +8,7 @@ export const onInit: UmbEntryPointOnInit = (_host, extensionRegistry) => {
     console.log('Registering SimpleStats manifests');
     extensionRegistry.registerMany([
         ...dashboardManifests,
+        ...languageManifests,
     ]);
 
 

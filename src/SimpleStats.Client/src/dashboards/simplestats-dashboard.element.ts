@@ -104,26 +104,26 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
     const pagedRows = rows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
     return html`
-      <uui-box headline="Content Access Report">
+      <uui-box headline=${this.localize.term('simpleStats_reportHeadline')}>
         <p class="description">
-          Shows how many times each content node was accessed within the selected date range.
+          ${this.localize.term('simpleStats_reportDescription')}
         </p>
 
         <div class="filters">
           <div class="field">
-            <label class="field-label" for="start-date">Start date</label>
+            <label class="field-label" for="start-date">${this.localize.term('simpleStats_startDate')}</label>
             <uui-input id="start-date" type="date" .value=${this._startDate} @change=${this.#onStartDateChange}></uui-input>
           </div>
           <div class="field">
-            <label class="field-label" for="end-date">End date</label>
+            <label class="field-label" for="end-date">${this.localize.term('simpleStats_endDate')}</label>
             <uui-input id="end-date" type="date" .value=${this._endDate} @change=${this.#onEndDateChange}></uui-input>
           </div>
-          <uui-button look="primary" label="Apply" ?disabled=${rangeInvalid} @click=${this.#applyFilter}>
-            Apply
+          <uui-button look="primary" label=${this.localize.term('simpleStats_apply')} ?disabled=${rangeInvalid} @click=${this.#applyFilter}>
+            ${this.localize.term('simpleStats_apply')}
           </uui-button>
         </div>
 
-        ${rangeInvalid ? html`<p class="error">Start date must be before end date.</p>` : nothing}
+        ${rangeInvalid ? html`<p class="error">${this.localize.term('simpleStats_dateRangeError')}</p>` : nothing}
 
         ${this._loading
           ? this.#renderLoading()
@@ -147,8 +147,8 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
   #renderErrorState() {
     return html`
       <div class="empty-state">
-        <div class="empty-title">Couldn't load page view data</div>
-        <div class="empty-description">Something went wrong while fetching the report. Please try again.</div>
+        <div class="empty-title">${this.localize.term('simpleStats_errorTitle')}</div>
+        <div class="empty-description">${this.localize.term('simpleStats_errorDescription')}</div>
       </div>
     `;
   }
@@ -156,10 +156,9 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
   #renderEmptyState() {
     return html`
       <div class="empty-state">
-        <div class="empty-title">No records found</div>
+        <div class="empty-title">${this.localize.term('simpleStats_emptyTitle')}</div>
         <div class="empty-description">
-          No content nodes were accessed between ${this._appliedRange.start} and ${this._appliedRange.end}.
-          Try widening the date range.
+          ${this.localize.term('simpleStats_emptyDescription', this._appliedRange.start, this._appliedRange.end)}
         </div>
       </div>
     `;
@@ -167,10 +166,10 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
 
   #renderTable(rows: ContentAccessRow[], pagedRows: ContentAccessRow[], page: number, pageCount: number) {
     return html`
-      <uui-table aria-label="Content access report">
+      <uui-table aria-label=${this.localize.term('simpleStats_tableAriaLabel')}>
         <uui-table-head>
-          <uui-table-head-cell>Node Name</uui-table-head-cell>
-          <uui-table-head-cell>Times Accessed</uui-table-head-cell>
+          <uui-table-head-cell>${this.localize.term('simpleStats_columnNodeName')}</uui-table-head-cell>
+          <uui-table-head-cell>${this.localize.term('simpleStats_columnTimesAccessed')}</uui-table-head-cell>
         </uui-table-head>
         ${repeat(
           pagedRows,
@@ -186,8 +185,13 @@ export class SimpleStatsDashboardElement extends UmbLitElement {
 
       <div class="pagination">
         <div class="pagination-summary">
-          Showing ${page * PAGE_SIZE + 1}–${Math.min(rows.length, (page + 1) * PAGE_SIZE)} of ${rows.length} nodes
-          · ${PAGE_SIZE} per page
+          ${this.localize.term(
+            'simpleStats_paginationSummary',
+            page * PAGE_SIZE + 1,
+            Math.min(rows.length, (page + 1) * PAGE_SIZE),
+            rows.length,
+            PAGE_SIZE,
+          )}
         </div>
         <uui-pagination .total=${pageCount} .current=${page + 1} @change=${this.#onPageChange}></uui-pagination>
       </div>
