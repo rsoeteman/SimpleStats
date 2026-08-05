@@ -1,3 +1,5 @@
+using SimpleStats.Data;
+
 namespace SimpleStats.Services;
 
 /// <summary>
@@ -27,4 +29,15 @@ public interface ISimpleStatsService
     /// </summary>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     Task CommitStatsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all persisted page-view rows whose date falls within the given inclusive range.
+    /// Does not include not-yet-committed in-memory increments.
+    /// </summary>
+    /// <param name="startDate">The inclusive start of the date range.</param>
+    /// <param name="endDate">The inclusive end of the date range.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The matching page-view rows, ordered by date.</returns>
+    Task<IReadOnlyList<SimpleStatsPageView>> GetPageViewsAsync(
+        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default);
 }

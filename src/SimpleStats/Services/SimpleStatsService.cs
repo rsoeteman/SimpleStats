@@ -104,4 +104,19 @@ public sealed class SimpleStatsService : ISimpleStatsService
 
         _logger.LogDebug("SimpleStats committed pending view counts for {NodeCount} node(s)", snapshot.Count);
     }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SimpleStatsPageView>> GetPageViewsAsync(
+        DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default)
+    {
+        using IEfCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
+        List<SimpleStatsPageView> pageViews = await scope.ExecuteWithContextAsync(async (SimpleStatsContext db) =>
+            await db.PageViews
+                .Where(x => x.Date >= startDate && x.Date <= endDate)
+                .OrderBy(x => x.Date)
+                .ToListAsync(cancellationToken));
+        scope.Complete();
+
+        return pageViews;
+    }
 }
