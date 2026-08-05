@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SimpleStats.Data;
+using SimpleStats.Models;
+using Umbraco.Cms.Core.PublishedCache;
 using Umbraco.Cms.Persistence.EFCore.Scoping;
 
 namespace SimpleStats.Services;
@@ -12,11 +14,14 @@ namespace SimpleStats.Services;
 /// <see cref="IEFCoreScopeProvider{TDbContext}"/> on demand rather than holding a captured,
 /// request-scoped <see cref="SimpleStatsContext"/> — injecting a scoped DbContext into a
 /// singleton would be a captive-dependency bug and would not participate correctly in
-/// Umbraco's ambient scope/transaction per request.
+/// Umbraco's ambient scope/transaction per request. <see cref="IPublishedContentCache"/> is also
+/// registered as a singleton by Umbraco core, so it can be injected here directly without the
+/// same concern.
 /// </summary>
 public sealed class SimpleStatsService : ISimpleStatsService
 {
     private readonly IEFCoreScopeProvider<SimpleStatsContext> _scopeProvider;
+    private readonly IPublishedContentCache _publishedContentCache;
     private readonly ILogger<SimpleStatsService> _logger;
     private readonly ConcurrentDictionary<Guid, int> _pendingCounts = new();
 
@@ -25,9 +30,11 @@ public sealed class SimpleStatsService : ISimpleStatsService
     /// </summary>
     public SimpleStatsService(
         IEFCoreScopeProvider<SimpleStatsContext> scopeProvider,
+        IPublishedContentCache publishedContentCache,
         ILogger<SimpleStatsService> logger)
     {
         _scopeProvider = scopeProvider;
+        _publishedContentCache = publishedContentCache;
         _logger = logger;
     }
 
@@ -106,17 +113,26 @@ public sealed class SimpleStatsService : ISimpleStatsService
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<SimpleStatsPageView>> GetPageViewsAsync(
+    public async Task<IReadOnlyList<PageViewSummary>> GetPageViewsAsync(
         DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default)
     {
         using IEfCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
-        List<SimpleStatsPageView> pageViews = await scope.ExecuteWithContextAsync(async (SimpleStatsContext db) =>
+        var grouped = await scope.ExecuteWithContextAsync(async (SimpleStatsContext db) =>
             await db.PageViews
                 .Where(x => x.Date >= startDate && x.Date <= endDate)
-                .OrderBy(x => x.Date)
+                .GroupBy(x => x.NodeKey)
+                .Select(g => new { NodeKey = g.Key, Count = g.Sum(x => x.Count) })
+                .OrderByDescending(x => x.Count)
                 .ToListAsync(cancellationToken));
         scope.Complete();
 
-        return pageViews;
+        return grouped
+            .Select(x => new PageViewSummary
+            {
+                NodeKey = x.NodeKey,
+                NodeName = _publishedContentCache.GetById(preview: true, contentId: x.NodeKey)?.Name ?? "(Unknown)",
+                Count = x.Count,
+            })
+            .ToList();
     }
 }

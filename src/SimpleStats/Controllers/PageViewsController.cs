@@ -1,7 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SimpleStats.Data;
+using SimpleStats.Models;
 using SimpleStats.OpenApi;
 using SimpleStats.Services;
 using Umbraco.Cms.Api.Common.Attributes;
@@ -30,15 +30,16 @@ public sealed class PageViewsController : ControllerBase
         _simpleStatsService = simpleStatsService;
 
     /// <summary>
-    /// Gets recorded page views whose date falls within the given inclusive range.
+    /// Gets summarized page-view counts, one entry per distinct content node, for views recorded
+    /// within the given inclusive date range.
     /// </summary>
     /// <param name="startDate">The inclusive start of the date range.</param>
     /// <param name="endDate">The inclusive end of the date range.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The matching page views, or a 400 response if <paramref name="startDate"/> is after <paramref name="endDate"/>.</returns>
+    /// <returns>One summary per distinct node, with counts summed across the range and ordered by view count descending, or a 400 response if <paramref name="startDate"/> is after <paramref name="endDate"/>.</returns>
     [HttpGet("page-views")]
     [MapToApiVersion("1.0")]
-    public async Task<ActionResult<IEnumerable<SimpleStatsPageView>>> GetPageViews(
+    public async Task<ActionResult<IEnumerable<PageViewSummary>>> GetPageViews(
         DateOnly startDate,
         DateOnly endDate,
         CancellationToken cancellationToken)
@@ -48,7 +49,7 @@ public sealed class PageViewsController : ControllerBase
             return BadRequest("startDate must be less than or equal to endDate.");
         }
 
-        IReadOnlyList<SimpleStatsPageView> pageViews =
+        IReadOnlyList<PageViewSummary> pageViews =
             await _simpleStatsService.GetPageViewsAsync(startDate, endDate, cancellationToken);
 
         return Ok(pageViews);
