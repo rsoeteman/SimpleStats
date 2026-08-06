@@ -6,6 +6,9 @@ on:
       - main
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -95,7 +98,7 @@ jobs:
         run: dotnet pack --configuration Release -p:Version=${{ steps.gitversion.outputs.nuGetVersion }} -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }} --output ./artifacts
 
       - name: Push to NuGet.org
-        if: steps.vars.outputs.shouldReleaseToNuget == 'True'
+        if: github.event_name != 'pull_request' && steps.vars.outputs.shouldReleaseToNuget == 'True'
         shell: pwsh
         run: |
           Get-ChildItem "./artifacts/*.nupkg" | ForEach-Object {
