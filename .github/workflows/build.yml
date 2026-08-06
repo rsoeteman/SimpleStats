@@ -76,6 +76,9 @@ jobs:
         working-directory: ./src/SimpleStats.Client
         run: npm run build
 
+      - name: Run tests
+        run: dotnet test --configuration Release --no-restore
+
       - name: Install GitVersion
         uses: gittools/actions/gitversion/setup@v0
         with:

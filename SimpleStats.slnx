@@ -3,4 +3,7 @@
     <Project Path="src/SimpleStats.Client/SimpleStats.Client.csproj" />
     <Project Path="src/SimpleStats/SimpleStats.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SimpleStats.Tests/SimpleStats.Tests.csproj" />
+  </Folder>
 </Solution>
