@@ -1,0 +1,103 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      BUILD_CONFIGURATION: Release
+      BUILD_PLATFORM: Any CPU
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set branch variables
+        id: vars
+        shell: pwsh
+        run: |
+          $branch = "${{ github.ref }}"
+          $isMain = $branch -like "refs/heads/main"
+          $isTag = $branch -like "refs/tags/*"
+
+          $shouldPreRelease = $isMain -or $isTag
+          $shouldReleaseToNuget = $isTag -or ("${{ vars.PushToNugetOrg }}" -eq "true")
+
+          echo "Owner: ${{ github.repository_owner }}"
+          echo "isMain=$isMain" >> $env:GITHUB_OUTPUT
+          echo "isTag=$isTag" >> $env:GITHUB_OUTPUT
+          echo "shouldPreRelease=$shouldPreRelease" >> $env:GITHUB_OUTPUT
+          echo "shouldReleaseToNuget=$shouldReleaseToNuget" >> $env:GITHUB_OUTPUT
+
+      - name: Print variables
+        run: |
+          echo "Is main branch ${{ steps.vars.outputs.isMain }}"
+          echo "Is Tag ${{ steps.vars.outputs.isTag }}"
+          echo "Create NuGet package ${{ steps.vars.outputs.shouldPreRelease }}"
+          echo "Push to NuGet.org ${{ steps.vars.outputs.shouldReleaseToNuget }}"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Show .NET version
+        run: dotnet --version
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+
+      - name: NPM Install
+        working-directory: ./src/SimpleStats.Client
+        run: npm ci
+
+      - name: NPM Build
+        working-directory: ./src/SimpleStats.Client
+        run: npm run build
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: '5.10.x'
+
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0
+        with:
+          useConfigFile: true
+          configFilePath: Automation/GitVersion.yml
+
+      - name: Update umbraco-package.json
+        shell: pwsh
+        run: |
+          $file = "./src/SimpleStats.Client/wwwroot/App_Plugins/SimpleStats/umbraco-package.json"
+          (Get-Content $file -Raw) -replace '"version": ".*"', '"version": "${{ steps.gitversion.outputs.nuGetVersion }}"' | Set-Content $file
+
+      - name: Pack NuGet
+        run: dotnet pack --configuration Release -p:Version=${{ steps.gitversion.outputs.nuGetVersion }} -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersion }} --output ./artifacts
+
+      - name: Push to NuGet.org
+        if: steps.vars.outputs.shouldReleaseToNuget == 'True'
+        shell: pwsh
+        run: |
+          Get-ChildItem "./artifacts/*.nupkg" | ForEach-Object {
+            dotnet nuget push $_.FullName --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+          }

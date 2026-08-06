@@ -1,0 +1,11 @@
+mode: ContinuousDelivery
+next-version: 0.1.0
+branches:
+  main:
+    regex: main
+    mode: ContinuousDeployment
+    is-release-branch: true
+    tag: r
+ignore:
+  sha: []
+merge-message-formats: {}
