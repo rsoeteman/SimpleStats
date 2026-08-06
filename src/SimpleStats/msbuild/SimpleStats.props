@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Registers appsettings-schema.simplestats.json with Umbraco.Cms.Targets so consuming sites
+       get it copied in and referenced from their appsettings-schema.json at build time. -->
+  <ItemGroup>
+    <UmbracoJsonSchemaFiles Include="$(MSBuildThisFileDirectory)..\appsettings-schema.simplestats.json" />
+  </ItemGroup>
+</Project>
