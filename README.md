@@ -26,7 +26,7 @@ job, so tracking has minimal impact on page response times.
 Install the NuGet package into your Umbraco web project:
 
 ```bash
-dotnet add package SimpleStats
+dotnet add package Umbraco.Community.SimpleStats
 ```
 
 SimpleStats registers itself automatically via an Umbraco composer — no changes to `Program.cs`

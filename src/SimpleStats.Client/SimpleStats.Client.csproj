@@ -9,7 +9,7 @@
 
     <!-- NuGet packaging -->
     <IsPackable>true</IsPackable>
-    <PackageId>SimpleStats.Client</PackageId>
+    <PackageId>Umbraco.Community.SimpleStats.Client</PackageId>
 
     <!--
       Configure the static web asset base path so assets are served from
