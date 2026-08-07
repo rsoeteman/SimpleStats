@@ -15,6 +15,7 @@
     "ImageUrl": "https://github.com/rsoeteman.png",
     "SyncContributorsFromRepository": true
   },
+  "PackagesByAuthor": ["SEOChecker", "CMSImport", "MemberExport", "MediaProtect"],
   "Tags": ["analytics", "statistics", "dashboard", "page-views"],
   "Screenshots": [
     {
