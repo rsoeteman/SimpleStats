@@ -28,7 +28,8 @@
     Run `npm run build` inside this project directory first.
   -->
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\docs\nuget-readme.md" Pack="true" PackagePath="\README.md" />
+    <None Include="..\..\docs\images\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="wwwroot\App_Plugins\SimpleStats\umbraco-package.json">

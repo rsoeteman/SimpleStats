@@ -1,0 +1,25 @@
+{
+  "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+  "Title": "SimpleStats",
+  "Description": "A lightweight Umbraco backoffice package that tracks page views for your content and shows the results inside the CMS — no external analytics service, tracking snippet, or cookies required.",
+  "Category": "Analytics & Insights",
+  "AlternateCategory": "Analytics & Insights",
+  "DocumentationUrl": "https://github.com/rsoeteman/SimpleStats#readme",
+  "IssueTrackerUrl": "https://github.com/rsoeteman/SimpleStats/issues",
+  "LicenseTypes": ["Free"],
+  "PackageType": "Package",
+  "VersionDependencyMode": "Default",
+  "AuthorDetails": {
+    "Name": "Richard Soeteman",
+    "Url": "https://github.com/rsoeteman",
+    "ImageUrl": "https://github.com/rsoeteman.png",
+    "SyncContributorsFromRepository": true
+  },
+  "Tags": ["analytics", "statistics", "dashboard", "page-views"],
+  "Screenshots": [
+    {
+      "ImageUrl": "https://raw.githubusercontent.com/rsoeteman/SimpleStats/main/docs/images/dashboard-report.png",
+      "Caption": "SimpleStats dashboard showing times accessed per content node"
+    }
+  ]
+}
