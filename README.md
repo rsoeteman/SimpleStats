@@ -18,7 +18,7 @@ job, so tracking has minimal impact on page response times.
 
 ## Requirements
 
-- Umbraco 17.4+, 18.x, or 19.x
+- Umbraco 17.4+
 - .NET 10
 
 ## Installation
@@ -95,8 +95,8 @@ VS Code.
 | Umbraco | .NET  | Status       |
 |---------|-------|--------------|
 | 17.x    | 10    | ✅ Supported |
-| 18.x    | 10    | ✅ Supported |
-| 19.x    | TBD   | 🔜 Planned   |
+| 18.x    | 10    | ❌ Not yet supported ([Umbraco 18 breaking change](https://github.com/umbraco/Announcements/issues/32)) |
+| 19.x    | TBD   | ❌ Not yet supported |
 
 ## Local development
 
