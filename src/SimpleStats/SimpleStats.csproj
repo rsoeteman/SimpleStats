@@ -9,7 +9,7 @@
 
     <!-- NuGet packaging -->
     <IsPackable>true</IsPackable>
-    <PackageId>SimpleStats</PackageId>
+    <PackageId>Umbraco.Community.SimpleStats</PackageId>
     <PackageTags>umbraco;statistics;analytics;backoffice;umbraco-marketplace</PackageTags>
   </PropertyGroup>
 

@@ -112,6 +112,12 @@ jobs:
         if: github.event_name != 'pull_request' && steps.vars.outputs.shouldReleaseToNuget == 'True'
         shell: pwsh
         run: |
+          $failed = $false
           Get-ChildItem "./artifacts/*.nupkg" | ForEach-Object {
             dotnet nuget push $_.FullName --source "https://api.nuget.org/v3/index.json" --api-key ${{ steps.nuget_login.outputs.NUGET_API_KEY }} --skip-duplicate
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "Failed to push $($_.Name) (exit code $LASTEXITCODE)"
+              $failed = $true
+            }
           }
+          if ($failed) { exit 1 }
