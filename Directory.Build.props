@@ -11,6 +11,7 @@
     <PackageProjectUrl>https://github.com/rsoeteman/SimpleStats</PackageProjectUrl>
     <PackageTags>umbraco;statistics;analytics;backoffice</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
 
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
