@@ -17,17 +17,17 @@ internal sealed class FakeEfCoreScopeProvider<TDbContext> : IEFCoreScopeProvider
 
     public FakeEfCoreScopeProvider(TDbContext context) => _context = context;
 
-    public IEfCoreScope<TDbContext> CreateScope(
+    public IEFCoreScope<TDbContext> CreateScope(
         RepositoryCacheMode repositoryCacheMode = RepositoryCacheMode.Unspecified, bool? scopeFileSystems = null) =>
         new FakeEfCoreScope<TDbContext>(_context);
 
-    public IEfCoreScope<TDbContext> CreateDetachedScope(
+    public IEFCoreScope<TDbContext> CreateDetachedScope(
         RepositoryCacheMode repositoryCacheMode = RepositoryCacheMode.Unspecified, bool? scopeFileSystems = null) =>
         new FakeEfCoreScope<TDbContext>(_context);
 
-    public void AttachScope(IEfCoreScope<TDbContext> other) => throw new NotImplementedException();
+    public void AttachScope(IEFCoreScope<TDbContext> other) => throw new NotImplementedException();
 
-    public IEfCoreScope<TDbContext> DetachScope() => throw new NotImplementedException();
+    public IEFCoreScope<TDbContext> DetachScope() => throw new NotImplementedException();
 
     public IScopeContext? AmbientScopeContext => null;
 }

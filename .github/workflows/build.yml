@@ -64,6 +64,10 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore
 
+      - name: Show Umbraco version used by tests
+        shell: pwsh
+        run: dotnet list tests/SimpleStats.Tests package | Select-String "Umbraco.Cms"
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

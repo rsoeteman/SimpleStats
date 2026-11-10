@@ -14,17 +14,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Umbraco CMS core – version range covers Umbraco 17.x only. Umbraco 18 replaced
-         Swashbuckle.AspNetCore with Microsoft.AspNetCore.OpenApi (see
-         https://github.com/umbraco/Announcements/issues/32), which is a binary and source
-         breaking change for our OpenAPI/Swagger integration, so 18.x/19.x are not supported yet.
-         Floor is 17.4.0, not 17.0.0: AddUmbracoDbContext's shareUmbracoConnection overload (used
-         below) was not yet present in early 17.0.x patch releases. -->
-    <PackageReference Include="Umbraco.Cms.Core" Version="[17.4.0,18.0.0)" />
-    <PackageReference Include="Umbraco.Cms.Infrastructure" Version="[17.4.0,18.0.0)" />
-    <PackageReference Include="Umbraco.Cms.Web.Common" Version="[17.4.0,18.0.0)" />
-    <PackageReference Include="Umbraco.Cms.Persistence.EFCore" Version="[17.4.0,18.0.0)" />
-    <PackageReference Include="Umbraco.Cms.Api.Management" Version="[17.4.0,18.0.0)" />
+    <!-- Umbraco CMS core – version range covers every Umbraco 18.x release. The floor is 18.0.0 so
+         customers can pick any v18 version; NuGet resolves the lowest version in the range, so this
+         library compiles against 18.0.0 and never uses APIs added in later 18.x patches. The ceiling
+         excludes Umbraco 19, which has not been verified yet. Umbraco 17 is supported by SimpleStats 1.x. -->
+    <PackageReference Include="Umbraco.Cms.Core" Version="[18.0.0,19.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Infrastructure" Version="[18.0.0,19.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="[18.0.0,19.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Persistence.EFCore" Version="[18.0.0,19.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" Version="[18.0.0,19.0.0)" />
   </ItemGroup>
 
   <ItemGroup>

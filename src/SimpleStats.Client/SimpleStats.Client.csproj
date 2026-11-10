@@ -19,8 +19,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Umbraco CMS – version range covers Umbraco 17.x only, see SimpleStats.csproj for why -->
-    <PackageReference Include="Umbraco.Cms.Core" Version="[17.0.0,18.0.0)" />
+    <!-- Umbraco CMS – version range covers every Umbraco 18.x release, see SimpleStats.csproj for why -->
+    <PackageReference Include="Umbraco.Cms.Core" Version="[18.0.0,19.0.0)" />
   </ItemGroup>
 
   <!--
