@@ -7,14 +7,14 @@ using Umbraco.Cms.Persistence.EFCore.Scoping;
 namespace SimpleStats.Tests.TestSupport;
 
 /// <summary>
-/// Minimal <see cref="IEfCoreScope{TDbContext}"/> test double that runs
+/// Minimal <see cref="IEFCoreScope{TDbContext}"/> test double that runs
 /// <see cref="ExecuteWithContextAsync{T}(Func{TDbContext, Task{T}})"/> directly against a real,
 /// caller-owned <typeparamref name="TDbContext"/> instance instead of Umbraco's ambient scope
 /// machinery. Members outside what <c>SimpleStatsService</c> actually uses (locking, isolated
 /// caches, scope attach/detach) are intentionally unimplemented so a test fails loudly if it
 /// starts depending on them.
 /// </summary>
-internal sealed class FakeEfCoreScope<TDbContext> : IEfCoreScope<TDbContext>
+internal sealed class FakeEfCoreScope<TDbContext> : IEFCoreScope<TDbContext>
     where TDbContext : DbContext
 {
     private readonly TDbContext _context;
@@ -40,7 +40,7 @@ internal sealed class FakeEfCoreScope<TDbContext> : IEfCoreScope<TDbContext>
         // The shared DbContext is owned and disposed by the test, not by the scope.
     }
 
-    IScopedNotificationPublisher IEfCoreScope<TDbContext>.Notifications => throw new NotImplementedException();
+    IScopedNotificationPublisher IEFCoreScope<TDbContext>.Notifications => throw new NotImplementedException();
 
     IScopedNotificationPublisher ICoreScope.Notifications => throw new NotImplementedException();
 

@@ -18,7 +18,7 @@ job, so tracking has minimal impact on page response times.
 
 ## Requirements
 
-- Umbraco 17.4+
+- Umbraco 18.0+ (for Umbraco 17, use SimpleStats 1.x)
 - .NET 10
 
 ## Installation
@@ -94,8 +94,8 @@ VS Code.
 
 | Umbraco | .NET  | Status       |
 |---------|-------|--------------|
-| 17.x    | 10    | ✅ Supported |
-| 18.x    | 10    | ❌ Not yet supported ([Umbraco 18 breaking change](https://github.com/umbraco/Announcements/issues/32)) |
+| 18.x    | 10    | ✅ Supported (any 18.x release) |
+| 17.x    | 10    | ➡️ Use SimpleStats 1.x |
 | 19.x    | TBD   | ❌ Not yet supported |
 
 ## Local development

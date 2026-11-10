@@ -5,13 +5,13 @@ the results are shown in a dashboard next to your content tree.
 
 ## Requirements
 
-- Umbraco 17.4+
+- Umbraco 18.0+ (for Umbraco 17, use SimpleStats 1.x)
 - .NET 10
 
 ## Supported Umbraco versions
 
 | Umbraco | .NET  | Status       |
 |---------|-------|--------------|
-| 17.x    | 10    | ✅ Supported |
-| 18.x    | 10    | ❌ Not yet supported ([Umbraco 18 breaking change](https://github.com/umbraco/Announcements/issues/32)) |
+| 18.x    | 10    | ✅ Supported (any 18.x release) |
+| 17.x    | 10    | ➡️ Use SimpleStats 1.x |
 | 19.x    | TBD   | ❌ Not yet supported |

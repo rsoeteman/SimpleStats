@@ -5,7 +5,7 @@ $productlocation = "F:\umbraco\Packages\SimpleStats\src\"
 $projects = "SimpleStats\SimpleStats.csproj", "SimpleStats.Client\SimpleStats.Client.csproj"
 
 #Create new Umbraco Site
-dotnet new install Umbraco.Templates@17.5.3
+dotnet new install Umbraco.Templates@18.3.2
 dotnet new umbraco -n $sitename  --connection-string "Server=(localdb)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\Umbraco.mdf;Integrated Security=true" -sk Umbraco.TheStarterKit
 
 cd $sitename

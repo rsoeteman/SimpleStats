@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleStats.Configuration;
@@ -8,6 +8,8 @@ using SimpleStats.Middleware;
 using SimpleStats.NotificationHandlers;
 using SimpleStats.OpenApi;
 using SimpleStats.Services;
+using Umbraco.Cms.Api.Common.OpenApi;
+using Umbraco.Cms.Api.Management.OpenApi;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Notifications;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
@@ -39,7 +41,15 @@ public static class UmbracoBuilderExtensions
         builder.Services.AddRecurringBackgroundJob<SimpleStatsCommitJob>();
         builder.AddNotificationAsyncHandler<UmbracoApplicationStartedNotification, EnsureSimpleStatsDatabaseCreated>();
 
-        builder.Services.ConfigureOptions<ConfigureSimpleStatsSwaggerGenOptions>();
+        builder.AddBackOfficeOpenApiDocument(SimpleStatsApiConfiguration.ApiName, document => document
+            .WithTitle("SimpleStats API")
+            .WithBackOfficeAuthentication()
+            .ConfigureOpenApiOptions(options => options.AddDocumentTransformer((openApiDocument, _, _) =>
+            {
+                openApiDocument.Info.Version = "1.0";
+                openApiDocument.Info.Description = "API for reading SimpleStats page-view data.";
+                return Task.CompletedTask;
+            })));
 
         builder.Services.Configure<UmbracoPipelineOptions>(options =>
             options.AddFilter(new UmbracoPipelineFilter(nameof(SimpleStats))

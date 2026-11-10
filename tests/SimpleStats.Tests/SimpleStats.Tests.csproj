@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -17,8 +17,18 @@
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.6" />
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The SimpleStats library compiles against the lowest supported Umbraco (18.0.0). These direct,
+         floating references override that transitive version so the tests always run against the
+         latest stable Umbraco 18.x release available at restore time. -->
+    <PackageReference Include="Umbraco.Cms.Core" Version="18.*" />
+    <PackageReference Include="Umbraco.Cms.Infrastructure" Version="18.*" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="18.*" />
+    <PackageReference Include="Umbraco.Cms.Persistence.EFCore" Version="18.*" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" Version="18.*" />
   </ItemGroup>
 
   <ItemGroup>

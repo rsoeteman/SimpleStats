@@ -45,7 +45,7 @@ public sealed class SimpleStatsService : ISimpleStatsService
     /// <inheritdoc />
     public async Task<int> GetTotalViewsAsync(Guid nodeKey, CancellationToken cancellationToken = default)
     {
-        using IEfCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
+        using IEFCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
         int committed = await scope.ExecuteWithContextAsync(async (SimpleStatsContext db) =>
             await db.PageViews.Where(x => x.NodeKey == nodeKey).SumAsync(x => (int?)x.Count, cancellationToken) ?? 0);
         scope.Complete();
@@ -81,7 +81,7 @@ public sealed class SimpleStatsService : ISimpleStatsService
 
         DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        using IEfCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
+        using IEFCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
         await scope.ExecuteWithContextAsync(async (SimpleStatsContext db) =>
         {
             foreach ((Guid nodeKey, int count) in snapshot)
@@ -116,7 +116,7 @@ public sealed class SimpleStatsService : ISimpleStatsService
     public async Task<IReadOnlyList<PageViewSummary>> GetPageViewsAsync(
         DateOnly startDate, DateOnly endDate, CancellationToken cancellationToken = default)
     {
-        using IEfCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
+        using IEFCoreScope<SimpleStatsContext> scope = _scopeProvider.CreateScope();
         var grouped = await scope.ExecuteWithContextAsync(async (SimpleStatsContext db) =>
             await db.PageViews
                 .Where(x => x.Date >= startDate && x.Date <= endDate)
