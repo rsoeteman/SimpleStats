@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     outputs:
       nuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}
 
@@ -110,7 +110,8 @@ jobs:
 
       - name: E2E - Install Playwright browsers
         working-directory: ./tests/SimpleStats.E2ETests
-        run: npm run install:browsers
+        # --with-deps also installs the system libraries Chromium needs on Linux.
+        run: npm run install:browsers -- --with-deps
 
       - name: E2E - Run Playwright tests
         working-directory: ./tests/SimpleStats.E2ETests
@@ -123,8 +124,7 @@ jobs:
           # upload its logs. The runner is discarded after the job anyway.
           E2E_KEEP_SITE: '1'
           # Puts the throwaway site under a known folder for the log upload below.
-          TMP: ${{ runner.temp }}
-          TEMP: ${{ runner.temp }}
+          TMPDIR: ${{ runner.temp }}
         # A trace for every failed test (console errors, network, DOM snapshots), not only on retry.
         run: npm test -- --trace=retain-on-failure
 
