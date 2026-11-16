@@ -33,10 +33,12 @@ function Wait-UnattendedUpgrade {
     )
 
     # On a fresh site, Umbraco 18 runs the package migrations (The Starter Kit) and the document URL
-    # and alias rebuilds in a background service while Kestrel already serves requests. On SQLite
-    # that rebuild can stall: seen in CI, where the site then stayed on the "automatic upgrade in
-    # progress" page for good. So no HTTP request is sent until Umbraco has finished, which it shows
-    # by re-initialising in the same process: "Application started" is then logged a second time.
+    # and alias rebuilds in a background service while Kestrel already serves requests. On SQLite a
+    # request that arrives during that window can stall the rebuild: seen in CI, where the site then
+    # stayed on the "automatic upgrade in progress" page for good. So no HTTP request is sent until
+    # Umbraco has finished. It shows that in one of two ways: it logs "Unattended upgrade completed
+    # successfully" (seen in CI), or it re-initialises in the same process, so "Application started"
+    # is logged a second time (seen locally).
     # Returns $true when the upgrade finished (or none was pending), $false when it didn't before
     # $Deadline.
     $logDir = Join-Path (Join-Path $SitePath "umbraco") "Logs"
@@ -55,6 +57,7 @@ function Wait-UnattendedUpgrade {
 
         $startedCount = ([regex]::Matches($log, 'Application started\. Press Ctrl\+C')).Count
         $upgradePending = $log -match 'Unattended upgrade background service started'
+        if ($log -match 'Unattended upgrade completed successfully') { return $true }
         if ($startedCount -ge 2) { return $true }
         if ($startedCount -ge 1 -and -not $upgradePending) { return $true }
 
