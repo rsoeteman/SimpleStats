@@ -24,6 +24,9 @@ param(
     [switch]$SkipClientBuild,
     # Covers the whole script (template install, build and boot).
     [int]$TimeoutSeconds = 600,
+    # How long Umbraco's unattended upgrade on first boot may take before the site counts as stalled
+    # (exit code 3, so global-setup.ts retries on a new site).
+    [int]$UpgradeTimeoutSeconds = 120,
     [Parameter(Mandatory = $true)][string]$InfoOutputPath
 )
 
@@ -104,6 +107,18 @@ try {
     $url = "https://localhost:$HttpsPort"
     $readyUrl = "$url/umbraco/login"
     $ready = $false
+
+    $upgradeDeadline = (Get-Date).AddSeconds($UpgradeTimeoutSeconds)
+    if ($upgradeDeadline -gt $deadline) { $upgradeDeadline = $deadline }
+    Write-Host "Waiting for Umbraco's unattended upgrade to finish (up to $UpgradeTimeoutSeconds seconds)..."
+    if (-not (Wait-UnattendedUpgrade -SitePath $sitePath -Process $proc -Deadline $upgradeDeadline)) {
+        # Normally this takes 10-20 seconds. A stalled upgrade doesn't recover, so stop this site and
+        # exit with a dedicated code: global-setup.ts then retries on a brand-new site.
+        Write-Warning "Umbraco's unattended upgrade did not finish within $UpgradeTimeoutSeconds seconds. Log tail:"
+        if (Test-Path $logPath) { Get-Content $logPath -Tail 20 }
+        try { Stop-ProcessTree -ProcessId $proc.Id } catch {}
+        exit 3
+    }
 
     Write-Host "Waiting for site to become ready at $readyUrl (deadline: $($deadline.ToString('HH:mm:ss')))..."
     while ((Get-Date) -lt $deadline) {

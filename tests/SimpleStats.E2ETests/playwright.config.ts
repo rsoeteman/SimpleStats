@@ -22,7 +22,12 @@ export default defineConfig({
   // 'html' is the technical report. e2e-summary-reporter.ts stages per-test results and
   // attachments so scripts/generate-e2e-summary.mjs can build the plain-language summary.html
   // after the run (see that script for why it can't write into playwright-report/ itself).
-  reporter: [['html', { title: reportTitle, open: 'never' }], ['./reporters/e2e-summary-reporter.ts']],
+  // 'list' prints each test and its error to the console, so CI logs show what failed.
+  reporter: [
+    ['list'],
+    ['html', { title: reportTitle, open: 'never' }],
+    ['./reporters/e2e-summary-reporter.ts'],
+  ],
   globalSetup: require.resolve('./global-setup'),
   globalTeardown: require.resolve('./global-teardown'),
   use: {

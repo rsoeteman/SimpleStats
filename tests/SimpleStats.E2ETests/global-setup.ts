@@ -6,6 +6,9 @@ import { E2E_USER_EMAIL, E2E_USER_PASSWORD } from './e2e-user';
 const SITE_INFO_PATH = path.join(__dirname, '.tmp', 'site-info.json');
 const NEW_SITE_SCRIPT = path.join(__dirname, '..', '..', 'Automation', 'e2e', 'New-SqliteTestSite.ps1');
 const BOM_CHAR_CODE = 0xfeff;
+// New-SqliteTestSite.ps1 exits with this code when Umbraco's unattended upgrade stalls on first boot.
+const UPGRADE_STALLED_EXIT_CODE = 3;
+const MAX_PROVISION_ATTEMPTS = 3;
 // Ceiling, not a wait: setup moves on as soon as the site is ready. Normally this takes 1-2
 // minutes; the ceiling stops a stalled `dotnet build` from burning the CI time budget.
 const SETUP_BUDGET_MS = 10 * 60 * 1000;
@@ -32,7 +35,6 @@ export default async function globalSetup(): Promise<void> {
     '-ExecutionPolicy', 'Bypass',
     '-File', NEW_SITE_SCRIPT,
     '-InfoOutputPath', SITE_INFO_PATH,
-    '-TimeoutSeconds', String(SETUP_BUDGET_MS / 1000),
   ];
   if (process.env.E2E_SKIP_TEMPLATE_INSTALL === '1') {
     args.push('-SkipTemplateInstall');
@@ -45,10 +47,33 @@ export default async function globalSetup(): Promise<void> {
   // detached site process that keeps running, and on Windows that child inherits a handle to the
   // script's stdout. With 'pipe', execFileSync waits for an EOF that never comes and hangs
   // forever. The site info is read back from -InfoOutputPath instead of parsed from stdout.
-  execFileSync(POWERSHELL, args, {
-    stdio: 'inherit',
-    timeout: SETUP_BUDGET_MS + SCRIPT_GRACE_MS,
-  });
+  //
+  // One deadline covers every attempt, so retries can't add up to more than the budget. The script
+  // gets the time that is left through -TimeoutSeconds; `timeout` is the backstop for a stall in a
+  // blocking dotnet CLI call the script can't interrupt.
+  const deadline = Date.now() + SETUP_BUDGET_MS;
+  for (let attempt = 1; ; attempt++) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs <= 0) {
+      throw new Error(`Provisioning the site did not finish within ${SETUP_BUDGET_MS / 60000} minutes.`);
+    }
+
+    try {
+      execFileSync(POWERSHELL, [...args, '-TimeoutSeconds', String(Math.floor(remainingMs / 1000))], {
+        stdio: 'inherit',
+        timeout: remainingMs + SCRIPT_GRACE_MS,
+      });
+      break;
+    } catch (err) {
+      // Only a stalled unattended upgrade on first boot is retried, on a brand-new site. Anything
+      // else (a build error, a timeout) is a real failure. See New-SqliteTestSite.ps1.
+      const status = (err as { status?: number }).status;
+      if (status !== UPGRADE_STALLED_EXIT_CODE || attempt >= MAX_PROVISION_ATTEMPTS) {
+        throw err;
+      }
+      console.warn(`Umbraco's unattended upgrade stalled (attempt ${attempt} of ${MAX_PROVISION_ATTEMPTS}); retrying on a new site.`);
+    }
+  }
 
   if (!fs.existsSync(SITE_INFO_PATH)) {
     throw new Error(`New-SqliteTestSite.ps1 completed but did not write ${SITE_INFO_PATH}`);

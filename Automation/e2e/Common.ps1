@@ -25,6 +25,44 @@ function Test-SiteReady {
     return $httpCode -eq "200"
 }
 
+function Wait-UnattendedUpgrade {
+    param(
+        [string]$SitePath,
+        [System.Diagnostics.Process]$Process,
+        [datetime]$Deadline
+    )
+
+    # On a fresh site, Umbraco 18 runs the package migrations (The Starter Kit) and the document URL
+    # and alias rebuilds in a background service while Kestrel already serves requests. On SQLite
+    # that rebuild can stall: seen in CI, where the site then stayed on the "automatic upgrade in
+    # progress" page for good. So no HTTP request is sent until Umbraco has finished, which it shows
+    # by re-initialising in the same process: "Application started" is then logged a second time.
+    # Returns $true when the upgrade finished (or none was pending), $false when it didn't before
+    # $Deadline.
+    $logDir = Join-Path (Join-Path $SitePath "umbraco") "Logs"
+    while ((Get-Date) -lt $Deadline) {
+        if ($Process.HasExited) { return $true }   # the caller reports the early exit with the log tail
+
+        $log = ""
+        if (Test-Path $logDir) {
+            $log = (Get-ChildItem $logDir -Filter "UmbracoTraceLog.*.json" |
+                ForEach-Object { Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue }) -join "`n"
+        }
+
+        if ($log -match 'Unattended upgrade result was|Premigration upgrade result was') {
+            throw "Umbraco's unattended upgrade failed. See $logDir."
+        }
+
+        $startedCount = ([regex]::Matches($log, 'Application started\. Press Ctrl\+C')).Count
+        $upgradePending = $log -match 'Unattended upgrade background service started'
+        if ($startedCount -ge 2) { return $true }
+        if ($startedCount -ge 1 -and -not $upgradePending) { return $true }
+
+        Start-Sleep -Seconds 2
+    }
+    return $false
+}
+
 function Start-SiteProcess {
     param(
         [string]$SitePath,
