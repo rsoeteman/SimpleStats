@@ -67,5 +67,8 @@ npm run build
 ## Project conventions
 
 - Solution and projects live under `src/`
-- Tests (future) live under `tests/`
+- Tests live under `tests/`: unit tests in `tests/SimpleStats.Tests`, Playwright E2E tests in `tests/SimpleStats.E2ETests`
+- E2E site provisioning scripts live in `Automation/e2e/` (throwaway Umbraco 18 SQLite site with The Starter Kit)
+- Run E2E tests locally (`cd tests/SimpleStats.E2ETests; npm test`) before pushing; CI minutes are limited
+- E2E specs import `test`/`expect` from `tests/helpers/fixtures.ts`, use `data-mark` selectors and attach evidence with `testInfo.attach()`; add each new test to `TITLE_MAP` in `scripts/generate-e2e-summary.mjs`
 - NuGet packaging metadata is maintained in `Directory.Build.props`

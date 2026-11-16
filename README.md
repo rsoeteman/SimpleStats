@@ -113,6 +113,19 @@ npm install
 npm run build
 ```
 
+### Tests
+
+- Unit tests: `dotnet test`
+- End-to-end tests: Playwright tests that run against a freshly installed Umbraco 18 site with SimpleStats installed. See [tests/SimpleStats.E2ETests/README.md](tests/SimpleStats.E2ETests/README.md).
+
+```bash
+cd tests/SimpleStats.E2ETests
+npm install
+npm run install:browsers
+npm test
+```
+
+In CI, the E2E report and a plain-language summary are published to the repository's GitHub Pages site.
 
 ## License
 

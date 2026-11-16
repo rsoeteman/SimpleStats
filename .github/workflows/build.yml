@@ -18,6 +18,8 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+    outputs:
+      nuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}
 
     env:
       BUILD_CONFIGURATION: Release
@@ -96,6 +98,72 @@ jobs:
           useConfigFile: true
           configFilePath: Automation/GitVersion.yml
 
+      # E2E: provisions a throwaway Umbraco 18 SQLite site with SimpleStats installed and runs the
+      # Playwright suite in tests/SimpleStats.E2ETests against it. A failing E2E test fails this
+      # job, so a tagged build never reaches the NuGet push below.
+      - name: Ensure ASP.NET Core dev HTTPS certificate exists
+        run: dotnet dev-certs https
+
+      - name: E2E - NPM Install
+        working-directory: ./tests/SimpleStats.E2ETests
+        run: npm ci
+
+      - name: E2E - Install Playwright browsers
+        working-directory: ./tests/SimpleStats.E2ETests
+        run: npm run install:browsers
+
+      - name: E2E - Run Playwright tests
+        working-directory: ./tests/SimpleStats.E2ETests
+        timeout-minutes: 20
+        env:
+          SIMPLESTATS_VERSION: ${{ steps.gitversion.outputs.nuGetVersion }}
+          # The "NPM Build" step above already built the backoffice assets.
+          E2E_SKIP_CLIENT_BUILD: '1'
+          # Keeps the throwaway site folder (the process is still stopped) so the step below can
+          # upload its logs. The runner is discarded after the job anyway.
+          E2E_KEEP_SITE: '1'
+          # Puts the throwaway site under a known folder for the log upload below.
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        # A trace for every failed test (console errors, network, DOM snapshots), not only on retry.
+        run: npm test -- --trace=retain-on-failure
+
+      # The site's own console output and Umbraco log: the place to look when the site never
+      # reaches a usable state.
+      - name: E2E - Upload site logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-site-logs
+          path: |
+            ${{ runner.temp }}/SimpleStatsE2E/*/e2e-site*.log
+            ${{ runner.temp }}/SimpleStatsE2E/*/umbraco/Logs/
+          if-no-files-found: ignore
+
+      - name: E2E - Generate e2e summary
+        if: always()
+        working-directory: ./tests/SimpleStats.E2ETests
+        env:
+          SIMPLESTATS_VERSION: ${{ steps.gitversion.outputs.nuGetVersion }}
+        run: node scripts/generate-e2e-summary.mjs
+
+      - name: E2E - Upload Playwright report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-playwright-report
+          retention-days: 7
+          path: |
+            tests/SimpleStats.E2ETests/playwright-report/
+            tests/SimpleStats.E2ETests/test-results/
+          if-no-files-found: ignore
+
+      - name: E2E - Upload Playwright report for GitHub Pages
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tests/SimpleStats.E2ETests/playwright-report/
+
       - name: Update umbraco-package.json
         shell: pwsh
         run: |
@@ -125,3 +193,29 @@ jobs:
             }
           }
           if ($failed) { exit 1 }
+
+  publish-e2e-report:
+    # Publishes the Playwright HTML report and the plain-language summary.html to GitHub Pages, so
+    # results are one click away instead of a zip download. Deploys even when the E2E tests failed
+    # (that's usually exactly when you want to read it) as long as the run wasn't cancelled.
+    # If `build` fails before it reaches the E2E steps, no Pages artifact exists and this job fails
+    # too - re-run once the earlier failure is fixed.
+    needs: build
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy E2E report to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Add report links to job summary
+        run: |
+          echo "## SimpleStats ${{ needs.build.outputs.nuGetVersion }} (Umbraco 18)" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 📋 E2E summary: ${{ steps.deployment.outputs.page_url }}summary.html" >> "$GITHUB_STEP_SUMMARY"
+          echo "### 🎭 Full Playwright report: ${{ steps.deployment.outputs.page_url }}" >> "$GITHUB_STEP_SUMMARY"
