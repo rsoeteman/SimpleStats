@@ -46,6 +46,7 @@ The test site commits buffered page views every 5 seconds (`SimpleStats__CommitI
 - Umbraco marks elements with `data-mark`, and `getByTestId()` is configured to use it.
 - Attach evidence with `testInfo.attach(name, { body, contentType })`, not `page.screenshot({ path })`. Only attachments end up in the published report and in `summary.html`.
 - Give each new test a plain-language title and description in `TITLE_MAP` in `scripts/generate-e2e-summary.mjs`.
+- Plumbing steps such as the `authenticate` setup are listed in `HIDDEN_WHEN_PASSED` there. They are left out of `summary.html` while they pass and are only shown when they fail.
 
 ## Reports
 

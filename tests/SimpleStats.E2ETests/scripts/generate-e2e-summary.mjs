@@ -39,7 +39,20 @@ const TITLE_MAP = {
     description:
       'Publishes the Starter Kit pages, visits Home once and About Us twice as an anonymous visitor, then opens the SimpleStats dashboard and checks it shows 1 visit for Home and 2 for About Us.',
   },
+  'future date range shows no records': {
+    title: 'A date range in the future shows "No records found"',
+    description:
+      'Opens the SimpleStats dashboard, picks a date range that starts tomorrow and applies it, then checks the dashboard shows the "No records found" message instead of a table.',
+  },
 };
+
+// Plumbing steps that readers of the summary don't need to see. They are left out while they pass;
+// a failure is still listed, because every other check depends on them.
+const HIDDEN_WHEN_PASSED = new Set(['authenticate']);
+
+function isReported(test) {
+  return !(HIDDEN_WHEN_PASSED.has(test.title) && test.status === 'passed');
+}
 
 function describe(rawTitle) {
   return TITLE_MAP[rawTitle] ?? { title: rawTitle, description: '' };
@@ -292,9 +305,10 @@ function main() {
   try {
     copyAssets();
     fs.mkdirSync(REPORT_DIR, { recursive: true });
-    fs.writeFileSync(path.join(REPORT_DIR, 'SUMMARY.md'), renderMarkdown(data.tests));
-    fs.writeFileSync(path.join(REPORT_DIR, 'summary.html'), renderHtml(data.tests));
-    console.log(`e2e summary: wrote SUMMARY.md and summary.html for ${data.tests.length} test(s).`);
+    const tests = data.tests.filter(isReported);
+    fs.writeFileSync(path.join(REPORT_DIR, 'SUMMARY.md'), renderMarkdown(tests));
+    fs.writeFileSync(path.join(REPORT_DIR, 'summary.html'), renderHtml(tests));
+    console.log(`e2e summary: wrote SUMMARY.md and summary.html for ${tests.length} test(s).`);
   } catch (err) {
     console.warn(`e2e summary: failed to render summary (${err.message}); writing fallback summary.`);
     writeFallback(err.message);
