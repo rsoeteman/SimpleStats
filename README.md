@@ -55,6 +55,7 @@ optional.
 | Setting                 | Type       | Default | Description                                                                 |
 |--------------------------|------------|---------|-------------------------------------------------------------------------------|
 | `CommitIntervalSeconds`  | `int`      | `60`    | How often, in seconds, buffered view counts are committed to the database.    |
+| `CommitDelaySeconds`     | `int`      | `180`   | Seconds to wait after start-up before the first commit. Read once at start-up. |
 | `ExcludedNodeIds`        | `Guid[]`   | `[]`    | Content node keys (GUIDs) to exclude from page-view tracking.                 |
 
 ### Excluding content nodes from tracking

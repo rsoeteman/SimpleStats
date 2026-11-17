@@ -12,6 +12,7 @@ public sealed class SimpleStatsSettingsTests
 
         Assert.Empty(settings.ExcludedNodeIds);
         Assert.Equal(60, settings.CommitIntervalSeconds);
+        Assert.Equal(180, settings.CommitDelaySeconds);
     }
 
     [Fact]
@@ -30,6 +31,10 @@ public sealed class SimpleStatsSettingsTests
         JsonElement commitInterval = settingsSchema.GetProperty("CommitIntervalSeconds");
         Assert.Equal(defaults.CommitIntervalSeconds, commitInterval.GetProperty("default").GetInt32());
         Assert.Equal(1, commitInterval.GetProperty("minimum").GetInt32());
+
+        JsonElement commitDelay = settingsSchema.GetProperty("CommitDelaySeconds");
+        Assert.Equal(defaults.CommitDelaySeconds, commitDelay.GetProperty("default").GetInt32());
+        Assert.Equal(0, commitDelay.GetProperty("minimum").GetInt32());
 
         JsonElement excludedNodeIds = settingsSchema.GetProperty("ExcludedNodeIds");
         Assert.Empty(excludedNodeIds.GetProperty("default").EnumerateArray());

@@ -27,5 +27,12 @@ if ($KeepFiles) {
 }
 elseif (Test-Path $SitePath) {
     Write-Host "Removing site folder '$SitePath'..."
-    Remove-Item -Recurse -Force -Path $SitePath -ErrorAction SilentlyContinue
+    # A killed process can hold its native DLLs (e_sqlite3, ICU) open for a moment after taskkill
+    # returns, so wait for it to exit and retry, instead of leaving a half-deleted bin folder behind.
+    Wait-Process -Id $ProcessId -Timeout 15 -ErrorAction SilentlyContinue
+    for ($attempt = 1; $attempt -le 5 -and (Test-Path $SitePath); $attempt++) {
+        Remove-Item -Recurse -Force -Path $SitePath -ErrorAction SilentlyContinue
+        if (Test-Path $SitePath) { Start-Sleep -Seconds 1 }
+    }
+    if (Test-Path $SitePath) { Write-Warning "Could not fully remove '$SitePath'." }
 }

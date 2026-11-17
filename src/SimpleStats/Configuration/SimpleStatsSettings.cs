@@ -14,4 +14,11 @@ public sealed class SimpleStatsSettings
 
     /// <summary>Gets or sets how often, in seconds, buffered view counts are committed to the database.</summary>
     public int CommitIntervalSeconds { get; set; } = 60;
+
+    /// <summary>
+    /// Gets or sets how long, in seconds, to wait after application start-up before buffered view
+    /// counts are committed for the first time. Defaults to 180, the same as Umbraco's
+    /// <c>IRecurringBackgroundJob.DefaultDelay</c>. Read once at start-up.
+    /// </summary>
+    public int CommitDelaySeconds { get; set; } = 180;
 }

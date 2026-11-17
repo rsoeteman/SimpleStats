@@ -37,7 +37,7 @@ A full run takes about 2 minutes, most of which is Umbraco's first boot.
 | `E2E_SKIP_CLIENT_BUILD=1` | Skips `npm run build` of SimpleStats.Client (CI builds it in an earlier step) |
 | `SIMPLESTATS_VERSION` | Package version shown in the report titles (set by CI from GitVersion) |
 
-The test site commits buffered page views every 5 seconds (`SimpleStats__CommitIntervalSeconds=5`) instead of the default 60.
+The test site commits buffered page views every 5 seconds (`SimpleStats__CommitIntervalSeconds=5`) instead of the default 60. It also makes the first commit 5 seconds after start-up (`SimpleStats__CommitDelaySeconds=5`) instead of Umbraco's default 3 minutes.
 
 ## Writing specs
 
