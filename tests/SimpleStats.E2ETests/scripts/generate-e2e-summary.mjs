@@ -26,8 +26,15 @@ function reportTitle() {
 }
 const SUMMARY_TITLE = reportTitle();
 
+// When this summary was rendered, in UTC so local runs and CI runs read the same way.
+function renderedAt() {
+  return `${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+}
+const RENDERED_AT = renderedAt();
+
 // Maps a test's technical title to a plain-language title and one-line description for readers
-// who don't know Playwright. Tests without an entry fall back to their own title.
+// who don't know Playwright. Tests without an entry fall back to their own title. The order of the
+// entries is also the order of the cards in the summary; tests without an entry come last.
 const TITLE_MAP = {
   authenticate: {
     title: 'Sign in to the backoffice',
@@ -39,7 +46,25 @@ const TITLE_MAP = {
     description:
       'Publishes the Starter Kit pages, visits Home once and About Us twice as an anonymous visitor, then opens the SimpleStats dashboard and checks it shows 1 visit for Home and 2 for About Us.',
   },
+  'future date range shows no records': {
+    title: 'A date range in the future shows "No records found"',
+    description:
+      'Opens the SimpleStats dashboard, picks a date range that starts tomorrow and applies it, then checks the dashboard shows the "No records found" message instead of a table.',
+  },
 };
+
+// Plumbing steps that readers of the summary don't need to see. They are left out while they pass;
+// a failure is still listed, because every other check depends on them.
+const HIDDEN_WHEN_PASSED = new Set(['authenticate']);
+
+function isReported(test) {
+  return !(HIDDEN_WHEN_PASSED.has(test.title) && test.status === 'passed');
+}
+
+function reportOrder(test) {
+  const index = Object.keys(TITLE_MAP).indexOf(test.title);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
 
 function describe(rawTitle) {
   return TITLE_MAP[rawTitle] ?? { title: rawTitle, description: '' };
@@ -91,11 +116,13 @@ function renderMarkdown(tests) {
   lines.push(`# ${SUMMARY_TITLE}`);
   lines.push('');
   lines.push(
-    'This page explains, in plain language, what the automated end-to-end suite checks in a real ' +
+    'This page explains, in plain language, what the automated end-to-end suite for SimpleStats checks in a real ' +
       'running Umbraco site, whether each check passed on this run, and the actual screenshots / ' +
       'exported files it produced. For the full technical report (steps, traces, timings), see ' +
       '[the Playwright report](index.html).'
   );
+  lines.push('');
+  lines.push(`*Rendered on ${RENDERED_AT}.*`);
   lines.push('');
 
   for (const test of tests) {
@@ -195,8 +222,9 @@ function renderHtml(tests) {
     background: #fff;
   }
   h1 { margin-bottom: 0.25rem; }
-  .intro { color: #444; margin-bottom: 2rem; }
+  .intro { color: #444; margin-bottom: 0.5rem; }
   .intro a { color: #0969da; }
+  .rendered { color: #57606a; font-size: 0.9rem; margin: 0 0 2rem; }
   section.test {
     border: 1px solid #d0d7de;
     border-radius: 8px;
@@ -242,6 +270,7 @@ function renderHtml(tests) {
   @media (prefers-color-scheme: dark) {
     body { color: #e6edf3; background: #0d1117; }
     .intro { color: #9198a1; }
+    .rendered { color: #9198a1; }
     section.test { border-color: #30363d; }
     .description { color: #9198a1; }
     figure.screenshot img { border-color: #30363d; }
@@ -253,10 +282,11 @@ function renderHtml(tests) {
 <body>
   <h1>${escapeHtml(SUMMARY_TITLE)}</h1>
   <p class="intro">
-    Plain-language results from the automated end-to-end suite, run against a real Umbraco site.
+    Plain-language results from the automated end-to-end suite for SimpleStats, run against a real Umbraco site.
     For the full technical report (steps, traces, timings), see
     <a href="index.html">the Playwright report</a>.
   </p>
+  <p class="rendered">Rendered on ${escapeHtml(RENDERED_AT)}.</p>
   ${sections}
 </body>
 </html>
@@ -292,9 +322,10 @@ function main() {
   try {
     copyAssets();
     fs.mkdirSync(REPORT_DIR, { recursive: true });
-    fs.writeFileSync(path.join(REPORT_DIR, 'SUMMARY.md'), renderMarkdown(data.tests));
-    fs.writeFileSync(path.join(REPORT_DIR, 'summary.html'), renderHtml(data.tests));
-    console.log(`e2e summary: wrote SUMMARY.md and summary.html for ${data.tests.length} test(s).`);
+    const tests = data.tests.filter(isReported).sort((a, b) => reportOrder(a) - reportOrder(b));
+    fs.writeFileSync(path.join(REPORT_DIR, 'SUMMARY.md'), renderMarkdown(tests));
+    fs.writeFileSync(path.join(REPORT_DIR, 'summary.html'), renderHtml(tests));
+    console.log(`e2e summary: wrote SUMMARY.md and summary.html for ${tests.length} test(s).`);
   } catch (err) {
     console.warn(`e2e summary: failed to render summary (${err.message}); writing fallback summary.`);
     writeFallback(err.message);
