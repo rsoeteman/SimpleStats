@@ -86,6 +86,9 @@ try {
     # Commit buffered page views every 5 seconds instead of every minute, so tests don't wait long
     # before visits show up on the dashboard.
     $Env:SIMPLESTATS__COMMITINTERVALSECONDS = "5"
+    # Umbraco otherwise waits 3 minutes after start-up (IRecurringBackgroundJob.DefaultDelay)
+    # before the first commit, so visits made early in a run wouldn't reach the dashboard in time.
+    $Env:SIMPLESTATS__COMMITDELAYSECONDS = "5"
     $Env:ASPNETCORE_URLS = "https://localhost:$HttpsPort"
     # --no-launch-profile (Start-SiteProcess) skips Properties/launchSettings.json, so the
     # Development environment it would normally set must be provided here.

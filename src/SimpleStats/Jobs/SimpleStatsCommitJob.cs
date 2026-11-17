@@ -27,6 +27,7 @@ public sealed class SimpleStatsCommitJob : IRecurringBackgroundJob
         _simpleStatsService = simpleStatsService;
         _logger = logger;
         _period = GetPeriod(settingsMonitor.CurrentValue);
+        Delay = TimeSpan.FromSeconds(Math.Max(0, settingsMonitor.CurrentValue.CommitDelaySeconds));
 
         settingsMonitor.OnChange(settings =>
         {
@@ -37,6 +38,13 @@ public sealed class SimpleStatsCommitJob : IRecurringBackgroundJob
 
     /// <inheritdoc />
     public TimeSpan Period => _period;
+
+    /// <summary>
+    /// Gets the delay after application start-up before the first commit, taken from
+    /// <see cref="SimpleStatsSettings.CommitDelaySeconds"/>. Umbraco reads it once, when it
+    /// schedules the job.
+    /// </summary>
+    public TimeSpan Delay { get; }
 
     /// <inheritdoc />
     public event EventHandler PeriodChanged = delegate { };

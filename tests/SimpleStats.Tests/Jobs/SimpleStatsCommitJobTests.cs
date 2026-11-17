@@ -4,6 +4,7 @@ using Moq;
 using SimpleStats.Configuration;
 using SimpleStats.Jobs;
 using SimpleStats.Services;
+using Umbraco.Cms.Infrastructure.BackgroundJobs;
 
 namespace SimpleStats.Tests.Jobs;
 
@@ -43,6 +44,31 @@ public sealed class SimpleStatsCommitJobTests
         var job = CreateJob();
 
         Assert.Equal(TimeSpan.FromSeconds(1), job.Period);
+    }
+
+    [Fact]
+    public void Delay_ByDefault_MatchesUmbracoDefaultDelay()
+    {
+        _settingsMonitor.Setup(m => m.CurrentValue).Returns(new SimpleStatsSettings());
+
+        var job = CreateJob();
+
+        Assert.Equal(TimeSpan.FromMinutes(3), job.Delay);
+    }
+
+    [Theory]
+    [InlineData(5, 5)]
+    [InlineData(0, 0)]
+    [InlineData(-5, 0)]
+    public void Delay_OnConstruction_ReflectsCommitDelayClampedToZero(int commitDelaySeconds, int expectedSeconds)
+    {
+        _settingsMonitor.Setup(m => m.CurrentValue)
+            .Returns(new SimpleStatsSettings { CommitDelaySeconds = commitDelaySeconds });
+
+        IRecurringBackgroundJob job = CreateJob();
+
+        // Asserted through the interface: that's how Umbraco's scheduler reads it.
+        Assert.Equal(TimeSpan.FromSeconds(expectedSeconds), job.Delay);
     }
 
     [Fact]

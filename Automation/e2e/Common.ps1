@@ -73,11 +73,22 @@ function Start-SiteProcess {
         [string]$ErrLogPath
     )
 
-    # --no-launch-profile is required: otherwise `dotnet run` applies Properties/launchSettings.json's
-    # applicationUrl, which silently overrides the ASPNETCORE_URLS env var set by the caller.
+    # Runs the built site assembly directly (`dotnet <site>.dll`), not through `dotnet run`. On
+    # Windows, `dotnet run` was seen starting the site's apphost twice. The second copy blocks on
+    # Umbraco's MainDom lock and, about 25 seconds after boot, makes the first copy shut down so it
+    # can take over. Requests in flight get ECONNRESET and queued background tasks (such as
+    # publish-with-descendants) are lost. Running the dll also skips Properties/launchSettings.json,
+    # so its applicationUrl can't override the ASPNETCORE_URLS env var set by the caller.
+    # The working directory is the site folder, which ASP.NET Core uses as the content root.
+    $siteName = Split-Path -Leaf $SitePath
+    $siteDll = Get-ChildItem -Path (Join-Path $SitePath "bin") -Recurse -Filter "$siteName.dll" |
+        Where-Object { $_.DirectoryName -notmatch '[\\/](ref|refint)$' } |
+        Select-Object -First 1
+    if (-not $siteDll) { throw "Built site assembly $siteName.dll not found under $SitePath\bin. Build the site first." }
+
     $startArgs = @{
         FilePath               = "dotnet"
-        ArgumentList           = @("run", "--no-build", "--no-launch-profile")
+        ArgumentList           = @("`"$($siteDll.FullName)`"")
         WorkingDirectory       = $SitePath
         RedirectStandardOutput = $LogPath
         RedirectStandardError  = $ErrLogPath
@@ -92,8 +103,7 @@ function Start-SiteProcess {
 function Stop-ProcessTree {
     param([int]$ProcessId)
 
-    # `dotnet run` starts the site as a child process, so the whole tree has to go, not just the
-    # launcher.
+    # Kill the whole tree, not just the launcher, in case the site process has started children.
     if ($IsWindowsHost) {
         taskkill /PID $ProcessId /T /F | Out-Null
         return

@@ -34,6 +34,11 @@ const TITLE_MAP = {
     description:
       'Waits for the freshly installed Umbraco site to finish booting, then signs in as the test editor. Every other check starts from this session.',
   },
+  'page views are counted on the dashboard': {
+    title: 'Page visits show up on the SimpleStats dashboard',
+    description:
+      'Publishes the Starter Kit pages, visits Home once and About Us twice as an anonymous visitor, then opens the SimpleStats dashboard and checks it shows 1 visit for Home and 2 for About Us.',
+  },
 };
 
 function describe(rawTitle) {
