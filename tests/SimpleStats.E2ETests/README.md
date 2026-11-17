@@ -4,7 +4,7 @@ Playwright end-to-end tests that run against a real, freshly installed Umbraco 1
 
 Each run:
 
-1. `global-setup.ts` runs `Automation/e2e/New-SqliteTestSite.ps1`. That script builds the SimpleStats.Client backoffice assets, creates a throwaway Umbraco 18 site on SQLite with The Starter Kit under `%TEMP%\SimpleStatsE2E`, references `src/SimpleStats`, builds the site and starts it on `https://localhost:44351`. It then reads Umbraco's log and sends no request until Umbraco's first-boot unattended upgrade has finished. If that upgrade stalls (it can on SQLite), the script exits with code 3 and `global-setup.ts` retries on a brand-new site, up to 3 attempts.
+1. `global-setup.ts` runs `Automation/e2e/New-SqliteTestSite.ps1`. That script builds the SimpleStats.Client backoffice assets, creates a throwaway Umbraco 18 site on SQLite with The Starter Kit under `SimpleStatsE2E` in the temp folder (`%TEMP%` on Windows, `$TMPDIR` or `/tmp` on Linux), references `src/SimpleStats`, builds the site and starts it on `https://localhost:44351`. It then reads Umbraco's log and sends no request until Umbraco's first-boot unattended upgrade has finished. If that upgrade stalls (it can on SQLite), the script exits with code 3 and `global-setup.ts` retries on a brand-new site, up to 3 attempts.
 2. `tests/auth.setup.ts` waits until Umbraco has finished booting, signs in as the unattended-install user and saves the session to `.tmp/state.json`.
 3. The specs in `tests/*.spec.ts` run one at a time against that site, already signed in.
 4. `global-teardown.ts` runs `Automation/e2e/Stop-SqliteTestSite.ps1`, which stops the site and removes its folder.
