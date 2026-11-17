@@ -45,7 +45,7 @@ The test site commits buffered page views every 5 seconds (`SimpleStats__CommitI
 - Start with `await umbracoUi.goToBackOffice()`. A new test page only has the session cookies, not a loaded backoffice.
 - Umbraco marks elements with `data-mark`, and `getByTestId()` is configured to use it.
 - Attach evidence with `testInfo.attach(name, { body, contentType })`, not `page.screenshot({ path })`. Only attachments end up in the published report and in `summary.html`.
-- Give each new test a plain-language title and description in `TITLE_MAP` in `scripts/generate-e2e-summary.mjs`.
+- Give each new test a plain-language title and description in `TITLE_MAP` in `scripts/generate-e2e-summary.mjs`. The order of the entries there is the order of the cards in `summary.html`.
 - Plumbing steps such as the `authenticate` setup are listed in `HIDDEN_WHEN_PASSED` there. They are left out of `summary.html` while they pass and are only shown when they fail.
 
 ## Reports
